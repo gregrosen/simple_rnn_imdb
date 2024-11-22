@@ -1,0 +1,1 @@
+Environment: conda create --name rnn_imdb  python=3.11
