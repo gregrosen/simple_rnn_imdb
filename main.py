@@ -5,43 +5,50 @@ from tensorflow.keras.datasets import imdb
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras.models import load_model
 
-# Use Streamlit session state to persist the model across app interactions
-if 'model' not in st.session_state:
-    # Load the model only once and store it in session state
-    st.session_state['model'] = load_model('simple_rnn_imdb_optimized.h5')
+# Cache the model to avoid reloading
+@st.cache_resource
+def load_sentiment_model():
+    return load_model('simple_rnn_imdb_optimized.h5')
 
 # Load the IMDB dataset word index
 word_index = imdb.get_word_index()
 reverse_word_index = {value: key for key, value in word_index.items()}
 
-# Helper function to decode reviews
+# Helper functions
 def decode_review(encoded_review):
     return ' '.join([reverse_word_index.get(i - 3, '?') for i in encoded_review])
 
-# Helper function to preprocess user input
 def preprocess_text(text):
     words = text.lower().split()
     encoded_review = [word_index.get(word, 2) + 3 for word in words]
     padded_review = sequence.pad_sequences([encoded_review], maxlen=500)
-    return padded_review
+    return np.array(padded_review, dtype=np.float32)  # Ensure correct dtype
 
 # Streamlit app
 st.title('IMDB Movie Review Sentiment Analysis')
 st.write('Enter a movie review to classify it as positive or negative.')
+
+# Load model
+model = load_sentiment_model()
+st.write(f"TensorFlow Version: {tf.__version__}")  # Debug TF version
 
 # User input
 user_input = st.text_area('Movie Review')
 
 if st.button('Classify'):
     preprocessed_input = preprocess_text(user_input)
-    model = st.session_state['model']  # Access the preloaded model
+    st.write(f"Input Shape: {preprocessed_input.shape}")  # Debug input shape
 
-    # Make prediction
-    prediction = model.predict(preprocessed_input)
-    sentiment = 'Positive' if prediction[0][0] > 0.5 else 'Negative'
+    try:
+        # Make prediction
+        prediction = model.predict(preprocessed_input)
+        sentiment = 'Positive' if prediction[0][0] > 0.5 else 'Negative'
 
-    # Display the result
-    st.write(f'Sentiment: {sentiment}')
-    st.write(f'Prediction Score: {prediction[0][0]}')
+        # Display the result
+        st.write(f'Sentiment: {sentiment}')
+        st.write(f'Prediction Score: {prediction[0][0]}')
+
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
 else:
     st.write('Please enter a movie review to classify.')
