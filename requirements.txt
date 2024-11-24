@@ -8,3 +8,5 @@ streamlit
 scikeras
 ipykernel
 tensorflow-metal==1.1.0
+scikit-optimize
+keras-tuner
