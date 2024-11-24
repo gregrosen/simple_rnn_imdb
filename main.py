@@ -27,18 +27,18 @@ def preprocess_text(text):
 
 # Streamlit app
 st.title('IMDB Movie Review Sentiment Analysis')
-st.write('Enter a movie review to classify it as positive or negative.')
+st.write('Copy-paste (or write your own) an official movie review to classify it as positive or negative. Keep in mind this model is only trained on official movie reviews.')
 
 # Load model
 model = load_sentiment_model()
-st.write(f"TensorFlow Version: {tf.__version__}")  # Debug TF version
+# st.write(f"TensorFlow Version: {tf.__version__}")  # Debug TF version
 
 # User input
 user_input = st.text_area('Movie Review')
 
 if st.button('Classify'):
     preprocessed_input = preprocess_text(user_input)
-    st.write(f"Input Shape: {preprocessed_input.shape}")  # Debug input shape
+    # st.write(f"Input Shape: {preprocessed_input.shape}")  # Debug input shape
 
     try:
         # Make prediction
