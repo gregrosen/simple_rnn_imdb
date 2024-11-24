@@ -20,8 +20,9 @@ def decode_review(encoded_review):
 
 def preprocess_text(text):
     words = text.lower().split()
-    encoded_review = [word_index.get(word, 2) + 3 for word in words]
-    padded_review = sequence.pad_sequences([encoded_review], maxlen=500)
+    encoded_review = [word_index.get(word, 2) + 3 for word in words]  # Map unknown words to index 2
+    valid_encoded_review = [idx if idx < 10000 else 2 for idx in encoded_review]  # Replace OOV indices with "unknown"
+    padded_review = sequence.pad_sequences([valid_encoded_review], maxlen=500)
     return np.array(padded_review, dtype=np.float32)  # Ensure correct dtype
 
 # Streamlit app
